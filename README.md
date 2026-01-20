@@ -1,1 +1,1 @@
-# cointracker
+# Stock Tracker
