@@ -3,7 +3,7 @@ import { RefreshCw, Settings, Search, LayoutGrid } from "lucide-react";
 import SidebarItem from "./components/SideBarItem";
 import "./index.css";
 import { useStockData } from "./hooks/useStockData";
-import MarketTicker from "./components/MarketTicker";
+// import MarketTicker from "./components/MarketTicker";
 import StockChart from "./components/StockChart";
 import StockHeader from "./components/StockHeader";
 
@@ -86,7 +86,6 @@ export default function App() {
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Top Market Bar */}
-        <MarketTicker />
 
         {/* Dynamic Header */}
         <StockHeader selectedStock={selectedStock} />
