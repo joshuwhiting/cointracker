@@ -12,6 +12,39 @@ const StockChart = ({
   setInterval,
 }) => {
   const isRSI = type === "rsi";
+  const isIntraday = ["1m", "5m", "15m", "1h"].includes(interval);
+
+  // Generate grey background annotations for non-market hours (Pre/Post market)
+  const getXAxisAnnotations = () => {
+    if (!isIntraday || isRSI || !series[0]?.data?.length) return [];
+
+    const uniqueDates = [
+      ...new Set(series[0].data.map((d) => d.x.toString().split(" ")[0])),
+    ];
+    const annotations = [];
+
+    uniqueDates.forEach((date) => {
+      // Pre-market: 00:00 - 09:30
+      annotations.push({
+        x: new Date(`${date} 00:00`).getTime(),
+        x2: new Date(`${date} 09:30`).getTime(),
+        fillColor: "#e5e7eb", // gray-200
+        opacity: 0.3,
+        borderColor: "transparent",
+        label: { text: "" },
+      });
+      // Post-market: 16:00 - 23:59
+      annotations.push({
+        x: new Date(`${date} 16:00`).getTime(),
+        x2: new Date(`${date} 23:59`).getTime(),
+        fillColor: "#e5e7eb", // gray-200
+        opacity: 0.3,
+        borderColor: "transparent",
+        label: { text: "" },
+      });
+    });
+    return annotations;
+  };
 
   const chartOptions = {
     chart: {
@@ -20,7 +53,16 @@ const StockChart = ({
       toolbar: { show: false },
       background: "#fff",
     },
-    xaxis: { type: "datetime" },
+    xaxis: {
+      type: "datetime",
+      // Hide weekends (Saturday=6, Sunday=0)
+      rangeBreaks: [
+        {
+          pattern: "day of week",
+          values: [6, 0],
+        },
+      ],
+    },
     yaxis: isRSI
       ? {
           min: 0,
@@ -38,8 +80,9 @@ const StockChart = ({
       },
     },
     stroke: {
-      width: isRSI ? 1 : 2,
+      width: isRSI ? 2 : 1,
       curve: "smooth",
+      colors: isRSI ? undefined : ["#000000"],
     },
     annotations: isRSI
       ? {
@@ -48,7 +91,9 @@ const StockChart = ({
             { y: 30, borderColor: "#60a5fa", label: { text: "Oversold" } },
           ],
         }
-      : {},
+      : {
+          xaxis: getXAxisAnnotations(),
+        },
   };
 
   const handleRangeChange = (newRange) => {

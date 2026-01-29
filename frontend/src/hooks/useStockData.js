@@ -25,6 +25,9 @@ export const useStockData = () => {
                 price: data.price,
                 change: data.change,
                 percent: data.percent,
+                marketState: data.marketState,
+                preMarketPrice: data.preMarketPrice,
+                postMarketPrice: data.postMarketPrice,
               }
             : s,
         ),
@@ -43,6 +46,9 @@ export const useStockData = () => {
             day_low: data.day_low,
             day_high: data.day_high,
             price_change: data.price_change,
+            marketState: data.marketState,
+            preMarketPrice: data.preMarketPrice,
+            postMarketPrice: data.postMarketPrice,
           };
         }
         return currentSelected;

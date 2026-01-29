@@ -73,7 +73,10 @@ def fetch_stock_data(symbol):
         "open": info.get("open"),         
         "dayHigh": info.get("dayHigh"),
         "dayLow": info.get("dayLow"),
-        "percent_change": round(change_pct, 2)
+        "percent_change": round(change_pct, 2),
+        "marketState": info.get("marketState"),
+        "preMarketPrice": info.get("preMarketPrice"),
+        "postMarketPrice": info.get("postMarketPrice")
     }
 
 # ---------- Routes ----------
@@ -215,9 +218,10 @@ def history(symbol):
     period = request.args.get("period", "1y")
     interval = request.args.get("interval", "1d")
 
+    is_intraday = interval in ["1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h"]
     try:
         ticker = yf.Ticker(symbol)
-        hist = ticker.history(period=period, interval=interval)
+        hist = ticker.history(period=period, interval=interval, prepost=is_intraday)
         
         data = []
         for date, row in hist.iterrows():
@@ -270,7 +274,10 @@ def background_price_update():
                         "open": info.get("open"),
                         "dayHigh": info.get("dayHigh"),
                         "dayLow": info.get("dayLow"),
-                        "longName": info.get("longName")
+                        "longName": info.get("longName"),
+                        "marketState": info.get("marketState"),
+                        "preMarketPrice": info.get("preMarketPrice"),
+                        "postMarketPrice": info.get("postMarketPrice")
                     })
                 except Exception as e:
                     print(f"Polling error for {s.symbol}: {e}")
@@ -283,9 +290,10 @@ def handle_rsi(symbol):
     period = request.args.get("period", "1y")
     interval = request.args.get("interval", "1d")
 
+    is_intraday = interval in ["1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h"]
     try:
         ticker = yf.Ticker(symbol)
-        df = ticker.history(period=period, interval=interval)
+        df = ticker.history(period=period, interval=interval, prepost=is_intraday)
         
         if df.empty:
             return jsonify([])
