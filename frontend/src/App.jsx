@@ -16,6 +16,7 @@ export default function App() {
     setSelectedStock,
     loading,
     chartSeries,
+    rsiSeries,
     handleRefresh,
     handleTrackStock,
     handleDelete,
@@ -88,23 +89,11 @@ export default function App() {
 
         {/* Charts Section */}
         <div className="p-6 flex-1 overflow-y-auto bg-gray-50/50">
-          <StockChart series={chartSeries} />
+          <StockChart series={chartSeries} height={350} type="price" />
 
           {/* Secondary Indicators */}
           <div className="mt-6 grid grid-cols-1 gap-6">
-            <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-sm h-40">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                Relative Strength Index (12)
-              </p>
-              <div className="w-full h-24 mt-4 bg-gray-50 flex items-end px-2">
-                {/* This would be another smaller ApexChart line chart */}
-                <div className="w-full h-[1px] bg-red-200 relative mb-10">
-                  <span className="absolute -top-4 right-0 text-[8px] text-red-400">
-                    70 OVERBOUGHT
-                  </span>
-                </div>
-              </div>
-            </div>
+            <StockChart series={rsiSeries} height={150} type="rsi" />
           </div>
         </div>
       </main>

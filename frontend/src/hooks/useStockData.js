@@ -9,6 +9,7 @@ export const useStockData = () => {
   const [selectedStock, setSelectedStock] = useState(null);
   const [loading, setLoading] = useState(false);
   const [chartSeries, setChartSeries] = useState([{ data: [] }]);
+  const [rsiSeries, setRsiSeries] = useState([{ data: [] }]);
 
   // Socket listener for real-time updates
   useEffect(() => {
@@ -23,8 +24,8 @@ export const useStockData = () => {
                 change: data.change,
                 percent: data.percent,
               }
-            : s
-        )
+            : s,
+        ),
       );
 
       // 2. Update the header if the updated stock is currently selected
@@ -37,9 +38,9 @@ export const useStockData = () => {
             percent: data.percent,
             longName: data.longName,
             open: data.open,
-            dayLow: data.day_low,
-            dayHigh: data.day_high,
-            price_change: data.price_change
+            day_low: data.day_low,
+            day_high: data.day_high,
+            price_change: data.price_change,
           };
         }
         return currentSelected;
@@ -78,11 +79,15 @@ export const useStockData = () => {
 
   // Fetch history when selected stock changes
   useEffect(() => {
-    if (!selectedStock) return;
+    if (!selectedStock) {
+      setChartSeries([{ data: [] }]);
+      setRsiSeries([{ data: [] }]);
+      return;
+    }
     const fetchHistory = async () => {
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/history/${selectedStock.symbol}`
+          `http://127.0.0.1:8000/history/${selectedStock.symbol}`,
         );
         const data = await res.json();
         setChartSeries([{ data }]);
@@ -91,6 +96,30 @@ export const useStockData = () => {
       }
     };
     fetchHistory();
+  }, [selectedStock?.symbol]);
+
+  useEffect(() => {
+    if (!selectedStock) {
+      setChartSeries([{ data: [] }]);
+      setRsiSeries([{ data: [] }]);
+      return;
+    }
+
+    const fetchRSI = async () => {
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:8000/rsi/${selectedStock.symbol}`,
+        );
+        const data = await res.json();
+
+        // Expecting: [{ x: timestamp, y: rsi }]
+        setRsiSeries([{ name: "RSI", data }]);
+      } catch (e) {
+        console.error("Error fetching RSI:", e);
+      }
+    };
+
+    fetchRSI();
   }, [selectedStock?.symbol]);
 
   const handleRefresh = async () => {
@@ -145,6 +174,7 @@ export const useStockData = () => {
     setSelectedStock,
     loading,
     chartSeries,
+    rsiSeries,
     handleRefresh,
     handleTrackStock,
     handleDelete,

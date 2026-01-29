@@ -7,6 +7,8 @@ from flask_socketio import SocketIO, emit
 import threading
 import time
 import warnings
+import pandas_ta as ta
+import pandas as pd
 
 app = Flask(__name__) #create the flask app
 CORS(app) 
@@ -268,6 +270,30 @@ def background_price_update():
                     print(f"Polling error for {s.symbol}: {e}")
         
         time.sleep(10) # Wait 10 seconds before next update to avoid Yahoo rate limits
+        
+@app.route('/rsi/<symbol>')
+def handle_rsi(symbol):
+    df = yf.download(symbol, period="6mo", progress=False)
+
+    # Flatten columns if MultiIndex
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+
+    df["RSI_14"] = ta.rsi(df["Close"], length=14)
+
+    df = df.dropna().tail(30)
+
+    data = [
+        {
+            "x": idx.strftime("%Y-%m-%d"),
+            "y": round(row["RSI_14"], 2),
+        }
+        for idx, row in df.iterrows()
+    ]
+
+    return jsonify(data)
+
+
 
 @socketio.on('connect')
 def handle_connect():
